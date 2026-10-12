@@ -13,7 +13,7 @@ repository is where they are canonical.
 | `verify-apk.sh` | checks the finished artifact: `aapt2 dump badging`, `apksigner verify`, `llvm-nm` for the two exported symbols (`android_main`, `ANativeActivity_onCreate`), the `.so` inside the APK, the injected `android.app.lib_name`, and the theme attribute resolved by id. |
 | `file_picker.rs` | the in-app file picker, app-agnostic: a global request queue plus `draw(ctx)`, readable-root probing, extension filtering as the union of what the app asked for, "Show all files" with a hidden-file count, one/many/save/folder dialogs, and locked roots that name the permission they need. Written for a tablet: sized from `ctx.content_rect()`, enlarged padding, listings cached per visit. |
 | `modifiers.rs` | modifier-key tracking for a shell's `raw_input_hook`. winit's Android backend never emits `ModifiersChanged` and `egui-winit` reads modifiers only from that event, so `Ctrl`/`Shift`/`Alt` are otherwise permanently false. |
-| `prefs_watch.rs` | preferences written *while the app runs* (change-detected, at most every two seconds, atomic rename), plus the live-window count a quit uses to end one window instead of the process. |
+| `prefs_watch.rs` | preferences written *while the app runs* (change-detected, at most every two seconds, atomic rename), plus the live-window count a quit uses to end one window instead of the process. **The caller must `create_dir_all` the destination folder first** — the atomic write puts its temp file inside it, so a missing folder is an `ENOENT` every write and nothing is ever saved. |
 
 ## The platform gaps these fill
 
