@@ -15,16 +15,6 @@
 //! was last written, and at most every [`Self::every`]. Comparing first means an idle app writes
 //! nothing at all, and a change is on disk within the interval.
 //!
-//! # The folder must exist before the writer is built
-//!
-//! [`Writer::store`] writes its temporary file **inside** the destination folder and renames it
-//! into place, so a destination folder that does not exist is an `ENOENT` on every write — a log
-//! line every two seconds and **no preference saved at all**, which is the one thing this module
-//! exists to prevent. Create it before constructing the writer: an app's own `config_dir()` is
-//! usually a read-only *lookup* (the desktop creates the folder elsewhere, or never), and on
-//! Android nothing else has made it. This is the failure that compiles, passes every artifact
-//! check, installs, runs, opens its library and renders — and still never saves a setting.
-//!
 //! # Why the write is atomic
 //!
 //! A second window of the same app (see the shell's new-window path — a second `android_main` in
@@ -95,6 +85,9 @@ impl Writer {
 
 /// How many windows of this app are running in this process.
 ///
+/// Not every shell has a quit path to ask (`GridCraft` ends its process directly), so this is
+/// allowed to go uncalled there rather than being cfg'd per app.
+///
 /// A second window is a second `android_main` on its own thread (a second Activity), so this
 /// counts loops rather than apps: the shell registers one at the start and drops it when its loop
 /// ends. It is what tells a window whether ending it should end the *process* (the last window) or
@@ -102,6 +95,10 @@ impl Writer {
 static WINDOWS: AtomicUsize = AtomicUsize::new(0);
 
 /// The number of windows this process has running, including the calling one.
+///
+/// Not every shell has a quit path to ask (`GridCraft` ends its process directly), so this is
+/// allowed to go uncalled there.
+#[allow(dead_code)]
 pub fn windows() -> usize {
     WINDOWS.load(Ordering::Relaxed)
 }
